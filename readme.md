@@ -135,17 +135,33 @@ curl -X POST https://你的worker地址/v1/audio/speech \
 
 ### 支持的语音列表
 
-| 语音代码 | 描述 | 语言 | 适用文本 |
-|----------|------|------|----------|
-| zh-CN-XiaoxiaoNeural | 晓晓 | 中文 | 中文文本 |
-| zh-CN-YunxiNeural | 云希 | 中文 | 中文文本 |
-| zh-CN-YunyangNeural | 云扬 | 中文 | 中文文本 |
-| en-US-JennyNeural | Jenny | 英文 | 英文文本 |
-| en-US-GuyNeural | Guy | 英文 | 英文文本 |
-| ja-JP-NanamiNeural | Nanami | 日文 | 日文文本 |
-| ja-JP-KeitaNeural | Keita | 日文 | 日文文本 |
-| ko-KR-SunHiNeural | Sun-Hi | 韩文 | 韩文文本 |
-| ko-KR-InJoonNeural | InJoon | 韩文 | 韩文文本 |
+> 注意：请确保使用与语音对应的语言文本，例如中文语音需配合中文文本使用。完整的语音列表请参考[微软官方文档](https://learn.microsoft.com/zh-cn/azure/cognitive-services/speech-service/language-support?tabs=tts)。
+
+以下是常用语音示例：
+
+| 语音代码 | 描述 | 语言 |
+|----------|------|------|
+| zh-CN-XiaoxiaoNeural | 晓晓 - 温暖活泼 | 中文 |
+| zh-CN-XiaoyiNeural | 晓伊 - 温暖亲切 | 中文 |
+| zh-CN-YunxiNeural | 云希 - 男声，稳重 | 中文 |
+| zh-CN-YunyangNeural | 云扬 - 男声，专业 | 中文 |
+| zh-CN-XiaohanNeural | 晓涵 - 自然流畅 | 中文 |
+| zh-CN-XiaomengNeural | 晓梦 - 甜美活力 | 中文 |
+| zh-CN-XiaochenNeural | 晓辰 - 温和从容 | 中文 |
+| zh-CN-XiaoruiNeural | 晓睿 - 男声，儒雅 | 中文 |
+| zh-CN-XiaoshuangNeural | 晓双 - 女声，温柔 | 中文 |
+| zh-CN-YunfengNeural | 云枫 - 男声，成熟 | 中文 |
+| zh-CN-YunjianNeural | 云健 - 男声，阳光 | 中文 |
+| zh-CN-XiaoxuanNeural | 晓萱 - 女声，知性 | 中文 |
+| zh-CN-YunxiaNeural | 云夏 - 男声，青春 | 中文 |
+| zh-CN-XiaomoNeural | 晓墨 - 女声，优雅 | 中文 |
+| zh-CN-XiaozhenNeural | 晓甄 - 女声，自信 | 中文 |
+| en-US-JennyNeural | Jenny | 英文 |
+| en-US-GuyNeural | Guy | 英文 |
+| ja-JP-NanamiNeural | Nanami | 日文 |
+| ja-JP-KeitaNeural | Keita | 日文 |
+| ko-KR-SunHiNeural | Sun-Hi | 韩文 |
+| ko-KR-InJoonNeural | InJoon | 韩文 |
 
 ## 📝 注意事项
 

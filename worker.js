@@ -58,16 +58,19 @@ async function handleRequest(request) {
                 input,
                 voice = "zh-CN-XiaoxiaoNeural",
                 response_format = "mp3",
-                speed = 1.0
+                speed = 1.0,
+                pitch = 0, // 添加 pitch 参数，默认值为 0
+                style = "general"//添加style参数，默认值为general
             } = requestBody;
 
             const rate = ((speed - 1) * 100).toFixed(0);
-            
+            const numPitch = ((pitch - 1) * 100).toFixed(0); // 将 pitch 参数转换为百分比形式
             const response = await getVoice(
                 input, 
                 voice, 
                 rate,
-                0,
+                numPitch,
+                style,
                 "audio-24khz-48kbitrate-mono-mp3",
                 false
             );
@@ -109,7 +112,7 @@ async function handleOptions(request) {
 }
 
 // 优化 getVoice 函数
-async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0, outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
+async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0,style="general", outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
     try {
         const endpoint = await getEndpoint();
         const url = `https://${endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`;
@@ -122,7 +125,7 @@ async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitc
                 "User-Agent": "okhttp/4.5.0",
                 "X-Microsoft-OutputFormat": outputFormat
             },
-            body: getSsml(text, voiceName, rate, pitch)
+            body: getSsml(text, voiceName, rate, pitch,style)
         });
 
         if (!response.ok) {
@@ -155,14 +158,15 @@ async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitc
     }
 }
 
-function getSsml(text, voiceName, rate, pitch) {
+function getSsml(text, voiceName, rate, pitch,style) {
     return `<speak xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="http://www.w3.org/2001/mstts" version="1.0" xml:lang="zh-CN"> 
                 <voice name="${voiceName}"> 
-                    <mstts:express-as style="general" styledegree="1.0" role="default"> 
+                    <mstts:express-as style="${style}"  styledegree="1.0" role="default" > 
                         <prosody rate="${rate}%" pitch="${pitch}%" volume="50">${text}</prosody> 
                     </mstts:express-as> 
                 </voice> 
             </speak>`;
+
 }
 
 // 优化 getEndpoint 函数

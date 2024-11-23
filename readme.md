@@ -93,7 +93,9 @@ curl -X POST https://你的worker地址/v1/audio/speech \
     "input": "你好，世界！",
     "voice": "zh-CN-XiaoxiaoNeural",
     "response_format": "mp3",
-    "speed": 1.0
+    "speed": 1.0,
+    "pitch": 1.0,
+    "style":"general"
   }' --output chinese.mp3
 ```
 
@@ -107,7 +109,9 @@ curl -X POST https://你的worker地址/v1/audio/speech \
     "input": "Hello, World!",
     "voice": "en-US-JennyNeural",
     "response_format": "mp3",
-    "speed": 1.0
+    "speed": 1.0,
+    "pitch": 1.0,
+    "style":"general"
   }' --output english.mp3
 ```
 
@@ -132,6 +136,8 @@ curl -X POST https://你的worker地址/v1/audio/speech \
 | voice | string | 是 | 语音名称 | - | zh-CN-XiaoxiaoNeural |
 | response_format | string | 否 | 输出格式 | mp3 | mp3 |
 | speed | number | 否 | 语速 (0.5-2.0) | 1.0 | 1.0 |
+| pitch | number | 否 | 语调 (0.5-2.0) | 1.0 | 1.0 |
+| style | string | 否 | 情绪 | general | general |
 
 ### 支持的语音列表
 
@@ -162,6 +168,16 @@ curl -X POST https://你的worker地址/v1/audio/speech \
 | ja-JP-KeitaNeural | Keita | 日文 |
 | ko-KR-SunHiNeural | Sun-Hi | 韩文 |
 | ko-KR-InJoonNeural | InJoon | 韩文 |
+
+以下是常用情绪参数示例：
+| 参数值 | 描述 |
+| angry | 生气 |
+| chat  | 轻松 |
+| cheerful  | 积极 |
+| sad  | 悲伤 |
+
+更多可以查看
+[微软官方文档](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/speech-synthesis-markup-voice)。
 
 ## 📝 注意事项
 

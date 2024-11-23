@@ -111,33 +111,34 @@ async function handleOptions(request) {
     });
 }
 
-// 优化 getVoice 函数
-async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0,style="general", outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
+async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0, style = "general", outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
     try {
-        const endpoint = await getEndpoint();
-        const url = `https://${endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`;
-        
-        const response = await fetch(url, {
-            method: "POST",
+        const maxChunkSize = 2000; // 假设每次请求的最大文本长度为2000字符
+        const chunks = [];
+
+        // 将长文本分段
+        for (let i = 0; i < text.length; i += maxChunkSize) {
+            const chunk = text.slice(i, i + maxChunkSize);
+            chunks.push(chunk);
+        }
+
+        // 获取每个分段的音频
+        const audioChunks = await Promise.all(chunks.map(chunk => getAudioChunk(chunk, voiceName, rate, pitch, style, outputFormat)));
+
+        // 将音频片段拼接起来
+        const concatenatedAudio = new Blob(audioChunks, { type: 'audio/mpeg' });
+        const response = new Response(concatenatedAudio, {
             headers: {
-                "Authorization": endpoint.t,
-                "Content-Type": "application/ssml+xml",
-                "User-Agent": "okhttp/4.5.0",
-                "X-Microsoft-OutputFormat": outputFormat
-            },
-            body: getSsml(text, voiceName, rate, pitch,style)
+                "Content-Type": "audio/mpeg",
+                ...makeCORSHeaders()
+            }
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Edge TTS API error: ${response.status} ${errorText}`);
+        if (download) {
+            response.headers.set("Content-Disposition", `attachment; filename="${uuid()}.mp3"`);
         }
 
-        let newResponse = new Response(response.body, response);
-        if (download) {
-            newResponse.headers.set("Content-Disposition", `attachment; filename="${uuid()}.mp3"`);
-        }
-        return addCORSHeaders(newResponse);
+        return response;
 
     } catch (error) {
         console.error("语音合成失败:", error);
@@ -156,6 +157,77 @@ async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitc
             }
         });
     }
+}
+
+// 优化 getVoice 函数
+// async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0,style="general", outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
+//     try {
+//         const endpoint = await getEndpoint();
+//         const url = `https://${endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`;
+        
+//         const response = await fetch(url, {
+//             method: "POST",
+//             headers: {
+//                 "Authorization": endpoint.t,
+//                 "Content-Type": "application/ssml+xml",
+//                 "User-Agent": "okhttp/4.5.0",
+//                 "X-Microsoft-OutputFormat": outputFormat
+//             },
+//             body: getSsml(text, voiceName, rate, pitch,style)
+//         });
+
+//         if (!response.ok) {
+//             const errorText = await response.text();
+//             throw new Error(`Edge TTS API error: ${response.status} ${errorText}`);
+//         }
+
+//         let newResponse = new Response(response.body, response);
+//         if (download) {
+//             newResponse.headers.set("Content-Disposition", `attachment; filename="${uuid()}.mp3"`);
+//         }
+//         return addCORSHeaders(newResponse);
+
+//     } catch (error) {
+//         console.error("语音合成失败:", error);
+//         return new Response(JSON.stringify({
+//             error: {
+//                 message: error.message,
+//                 type: "api_error",
+//                 param: null,
+//                 code: "edge_tts_error"
+//             }
+//         }), {
+//             status: 500,
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 ...makeCORSHeaders()
+//             }
+//         });
+//     }
+// }
+
+//获取单个音频数据
+async function getAudioChunk(text, voiceName, rate, pitch, style, outputFormat) {
+    const endpoint = await getEndpoint();
+    const url = `https://${endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`;
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Authorization": endpoint.t,
+            "Content-Type": "application/ssml+xml",
+            "User-Agent": "okhttp/4.5.0",
+            "X-Microsoft-OutputFormat": outputFormat
+        },
+        body: getSsml(text, voiceName, rate, pitch, style)
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Edge TTS API error: ${response.status} ${errorText}`);
+    }
+
+    return response.blob();
 }
 
 function getSsml(text, voiceName, rate, pitch,style) {

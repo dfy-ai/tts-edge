@@ -59,7 +59,7 @@ async function handleRequest(request) {
                 voice = "zh-CN-XiaoxiaoNeural",
                 response_format = "mp3",
                 speed = 1.0,
-                pitch = 0, // 添加 pitch 参数，默认值为 0
+                pitch = 1.0, // 添加 pitch 参数，默认值为 0
                 style = "general"//添加style参数，默认值为general
             } = requestBody;
 

@@ -13,6 +13,16 @@ let tokenInfo = {
     expiredAt: null
 };
 
+// 在文件顶部常量定义区域添加映射表
+const VOICE_MAPPING = {
+    'alloy': 'zh-CN-XiaoxiaoNeural',
+    'echo': 'zh-CN-YunxiNeural', 
+    'fable': 'zh-CN-XiaoyiNeural',
+    'onyx': 'zh-CN-YunyangNeural',
+    'nova': 'zh-CN-XiaohanNeural',
+    'shimmer': 'zh-CN-XiaomengNeural'
+};
+
 addEventListener("fetch", event => {
     event.respondWith(handleRequest(event.request));
 });
@@ -53,15 +63,18 @@ async function handleRequest(request) {
     if (path === "/v1/audio/speech") {
         try {
             const requestBody = await request.json();
-            const { 
+            let { 
                 model = "tts-1",
                 input,
                 voice = "zh-CN-XiaoxiaoNeural",
                 response_format = "mp3",
                 speed = 1.0,
-                pitch = 1.0, // 添加 pitch 参数，默认值为 0
-                style = "general"//添加style参数，默认值为general
+                pitch = 1.0,
+                style = "general"
             } = requestBody;
+
+            // 添加语音名称映射
+            voice = VOICE_MAPPING[voice] || voice;  // 如果存在映射则替换，否则保持原值
 
             const rate = ((speed - 1) * 100).toFixed(0);
             const numPitch = ((pitch - 1) * 100).toFixed(0); // 将 pitch 参数转换为百分比形式
@@ -159,52 +172,6 @@ async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitc
     }
 }
 
-// 优化 getVoice 函数
-// async function getVoice(text, voiceName = "zh-CN-XiaoxiaoNeural", rate = 0, pitch = 0,style="general", outputFormat = "audio-24khz-48kbitrate-mono-mp3", download = false) {
-//     try {
-//         const endpoint = await getEndpoint();
-//         const url = `https://${endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`;
-        
-//         const response = await fetch(url, {
-//             method: "POST",
-//             headers: {
-//                 "Authorization": endpoint.t,
-//                 "Content-Type": "application/ssml+xml",
-//                 "User-Agent": "okhttp/4.5.0",
-//                 "X-Microsoft-OutputFormat": outputFormat
-//             },
-//             body: getSsml(text, voiceName, rate, pitch,style)
-//         });
-
-//         if (!response.ok) {
-//             const errorText = await response.text();
-//             throw new Error(`Edge TTS API error: ${response.status} ${errorText}`);
-//         }
-
-//         let newResponse = new Response(response.body, response);
-//         if (download) {
-//             newResponse.headers.set("Content-Disposition", `attachment; filename="${uuid()}.mp3"`);
-//         }
-//         return addCORSHeaders(newResponse);
-
-//     } catch (error) {
-//         console.error("语音合成失败:", error);
-//         return new Response(JSON.stringify({
-//             error: {
-//                 message: error.message,
-//                 type: "api_error",
-//                 param: null,
-//                 code: "edge_tts_error"
-//             }
-//         }), {
-//             status: 500,
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 ...makeCORSHeaders()
-//             }
-//         });
-//     }
-// }
 
 //获取单个音频数据
 async function getAudioChunk(text, voiceName, rate, pitch, style, outputFormat) {

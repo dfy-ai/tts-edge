@@ -2,6 +2,16 @@
 
 Edge TTS Worker 是一个部署在 Cloudflare Worker 上的代理服务，它将微软 Edge TTS 服务封装成兼容 OpenAI 格式的 API 接口。通过本项目，您可以在没有微软认证的情况下，轻松使用微软高质量的语音合成服务。
 
+## 📑 目录
+
+- [✨ 特点](#-特点)
+- [🚀 快速部署](#快速部署)
+- [🧪 测试脚本使用](#-测试脚本使用)
+- [🔧 API 使用说明](#-api-使用说明)
+- [📝 注意事项](#-注意事项)
+- [❓ 常见问题](#-常见问题)
+- [📄 许可证](#-许可证)
+
 ## ✨ 特点
 
 - 绕过大陆地区访问限制，免去微软服务认证步骤
@@ -11,7 +21,7 @@ Edge TTS Worker 是一个部署在 Cloudflare Worker 上的代理服务，它将
 - 多语种支持 - 中文、英文、日文、韩文等
 - 快速部署 - 几分钟内即可完成
 
-## 快速部署
+## 🚀 快速部署
 
 ### 1. 创建 Worker
 1. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
@@ -81,9 +91,9 @@ chmod +x test_voices.sh
 
 ## 🔧 API 使用说明
 
-### 文本转语音接口
+### 基础用法
 
-**中文语音示例：**
+**最简单的调用方式：**
 ```bash
 curl -X POST https://你的worker地址/v1/audio/speech \
   -H "Content-Type: application/json" \
@@ -91,59 +101,88 @@ curl -X POST https://你的worker地址/v1/audio/speech \
   -d '{
     "model": "tts-1",
     "input": "你好，世界！",
-    "voice": "zh-CN-XiaoxiaoNeural",
-    "response_format": "mp3",
-    "speed": 1.0,
-    "pitch": 1.0,
-    "style":"general"
-  }' --output chinese.mp3
-```
-
-**英文语音示例：**
-```bash
-curl -X POST https://你的worker地址/v1/audio/speech \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-api-key" \
-  -d '{
-    "model": "tts-1",
-    "input": "Hello, World!",
-    "voice": "en-US-JennyNeural",
-    "response_format": "mp3",
-    "speed": 1.0,
-    "pitch": 1.0,
-    "style":"general"
-  }' --output english.mp3
-```
-
-**简化参数示例：**
-```bash
-curl -X POST https://你的worker地址/v1/audio/speech \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-api-key" \
-  -d '{
-    "model": "tts-1",
-    "input": "Hello, World!",
-    "voice": "en-US-JennyNeural"
+    "voice": "zh-CN-XiaoxiaoNeural"
   }' --output output.mp3
 ```
 
-**参数说明：**
+### 高级功能
+
+**语音情绪控制**
+```bash
+curl -X POST https://你的worker地址/v1/audio/speech \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your-api-key" \
+  -d '{
+    "model": "tts-1",
+    "input": "这是一段开心的话！",
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "style": "cheerful",
+    "speed": 1.2
+  }' --output happy.mp3
+```
+
+
+### 参数说明
 
 | 参数 | 类型 | 必填 | 说明 | 默认值 | 示例值 |
 |------|------|------|------|--------|--------|
 | model | string | 是 | 模型名称（固定值） | - | tts-1 |
-| input | string | 是 | 要转换的文本 | - | "你好，世界！" |
-| voice | string | 是 | 语音名称 | - | zh-CN-XiaoxiaoNeural |
-| response_format | string | 否 | 输出格式 | mp3 | mp3 |
-| speed | number | 否 | 语速 (0.5-2.0) | 1.0 | 1.0 |
-| pitch | number | 否 | 语调 (0.5-2.0) | 1.0 | 1.0 |
-| style | string | 否 | 情绪 | general | general |
+| input | string | 是 | 要转换的文本内容 | - | "你好，世界！" |
+| voice | string | 是 | 语音角色名称 | - | zh-CN-XiaoxiaoNeural |
+| response_format | string | 否 | 音频输出格式 | mp3 | mp3 |
+| speed | number | 否 | 语速调节 (0.5-2.0) | 1.0 | 1.2 |
+| pitch | number | 否 | 音调调节 (0.5-2.0) | 1.0 | 1.1 |
+| style | string | 否 | 语音情绪风格 | general | cheerful |
+
+### 语音角色说明
+
+#### OpenAI 兼容语音映射
+
+请根据实际需要，在worker.js中添加/修改对应的映射关系。
+
+| OpenAI 语音 | 对应微软语音角色 | 特点描述 |
+|------------|-----------------|----------|
+| alloy      | zh-CN-XiaoxiaoNeural | 晓晓 - 温暖自然的女声 |
+| echo       | zh-CN-YunxiNeural | 云希 - 稳重大气的男声 | 
+| fable      | zh-CN-XiaoyiNeural | 晓伊 - 亲切温柔的女声 |
+| onyx       | zh-CN-YunyangNeural | 云扬 - 专业权威的男声 |
+| nova       | zh-CN-XiaohanNeural | 晓涵 - 清新活泼的女声 |
+| shimmer    | zh-CN-XiaomengNeural | 晓梦 - 甜美动人的女声 |
+
+### 使用注意事项
+
+1. **语音与文本匹配**
+   - 中文语音(zh-CN)仅支持中文文本
+   - 英文语音(en-US)仅支持英文文本
+   - 日文语音(ja-JP)仅支持日文文本
+   - 韩文语音(ko-KR)仅支持韩文文本
+
+   错误的语音文本匹配可能导致:
+   - 发音不自然
+   - 语音合成失败
+   - API 返回错误
+   - 音频质量下降
+
+2. **多语种支持示例**
+   ```javascript
+   // 根据文本语言自动选择合适的语音
+   function selectVoice(text) {
+     if(/[\u4e00-\u9fa5]/.test(text)) {
+       return 'zh-CN-XiaoxiaoNeural';  // 中文
+     } else if(/^[a-zA-Z\s,.!?]+$/.test(text)) {
+       return 'en-US-JennyNeural';     // 英文
+     } else if(/[\u3040-\u30ff]/.test(text)) {
+       return 'ja-JP-NanamiNeural';    // 日文
+     } else if(/[\uAC00-\uD7AF]/.test(text)) {
+       return 'ko-KR-SunHiNeural';     // 韩文
+     }
+     return 'zh-CN-XiaoxiaoNeural';    // 默认中文
+   }
+   ```
 
 ### 支持的语音列表
 
-> 注意：请确保使用与语音对应的语言文本，例如中文语音需配合中文文本使用。完整的语音列表请参考[微软官方文档](https://learn.microsoft.com/zh-cn/azure/cognitive-services/speech-service/language-support?tabs=tts)。
-
-以下是常用语音示例：
+> 完整的语音支持列表请参考[微软官方文档](https://learn.microsoft.com/zh-cn/azure/cognitive-services/speech-service/language-support?tabs=tts)
 
 | 语音代码 | 描述 | 语言 |
 |----------|------|------|
@@ -169,15 +208,15 @@ curl -X POST https://你的worker地址/v1/audio/speech \
 | ko-KR-SunHiNeural | Sun-Hi | 韩文 |
 | ko-KR-InJoonNeural | InJoon | 韩文 |
 
-以下是常用情绪参数示例：
-| 参数值 | 描述 |
-| angry | 生气 |
-| chat  | 轻松 |
-| cheerful  | 积极 |
-| sad  | 悲伤 |
+#### 情绪风格参数
+| 风格参数 | 效果描述 | 适用场景 |
+|---------|---------|---------|
+| angry | 愤怒语气 | 情感强烈的对话 |
+| chat | 轻松闲聊 | 日常对话交流 |
+| cheerful | 开心愉悦 | 欢快场景表达 |
+| sad | 悲伤情绪 | 抒情感伤场景 |
 
-更多可以查看
-[微软官方文档](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/speech-synthesis-markup-voice)。
+更多语音风格和参数设置请参考[微软语音合成标记文档](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/speech-synthesis-markup-voice)
 
 ## 📝 注意事项
 
@@ -235,5 +274,6 @@ MIT License
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
+
 
 

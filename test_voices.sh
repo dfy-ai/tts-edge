@@ -26,6 +26,12 @@ mkdir -p "$OUTPUT_DIR"
 
 # 要测试的语音列表
 VOICES=(
+    "alloy"
+    "echo"
+    "fable"
+    "onyx"
+    "nova"
+    "shimmer"
     "zh-CN-XiaoxiaoNeural"
     "zh-CN-XiaoyiNeural" 
     "zh-CN-YunxiNeural"
